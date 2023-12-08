@@ -182,16 +182,31 @@ int main(void)
 {
     print_CW_info();
     int text_len = 0;
+    int func_num;
+    scanf("%d", &func_num);
     char** text = make_text(&text_len);
     char** new_text = delete_duplicate(text, &text_len);
-    char** f_func = f_upper(new_text, &text_len);
-    print_text(f_func, text_len);
-    char** s_func = delete_even(new_text, &text_len);
-    for (int i = 0; i < text_len; i++)
+    switch (func_num)
     {
-        free(text[i]);
-    }
-    free(text);
+    case 0:
+        print_text(new_text, text_len);
+        break;
+    case 1:
+        char** f_func = f_upper(new_text, &text_len);
+        print_text(f_func, text_len);
+        break;
+    case 2:
+        char** s_func = delete_even(new_text, &text_len);
+        print_text(s_func, text_len);
+        break;
+    case 3:
 
+        break;
+    case 4:
+
+        break;
+    default:
+        break;
+    }
     return 0;
 }
