@@ -156,14 +156,38 @@ char** delete_even(char** new_text, int* text_len)
 {
     char** formated_text = malloc(*text_len * sizeof(char*));
     int c = 0;
-    for(int i = 0; i < *text_len; i++)       
+    for(int i = 0; i < *text_len; i++)
     {
-        int str_len = strlen(new_text[i]);
-        if(str_len % 2 != 0)
+        char* copy_of_sentence = strdup(new_text[i]);
+        int word_count = 0;
+        int max_words = 10;
+        char** words = malloc(max_words * sizeof(char*));
+        char* token = strtok(copy_of_sentence, ", ");
+        while (token != NULL)
         {
-            formated_text[c] = new_text[i];
+            if(word_count == max_words)
+            {
+                max_words += 10;
+                words = realloc(words, max_words * sizeof(char*));
+            }
+            words[word_count] = malloc((strlen(token) + 1) * sizeof(char));
+            words[word_count] = strdup(token);
+            token = strtok(NULL, ", ");
+            word_count++;
+        }
+
+        if(word_count % 2 != 0)
+        {
+            formated_text[c] = strdup(new_text[i]);
             c++;
         }
+
+        for (int j = 0; j < word_count; j++)
+        {
+            free(words[j]);
+        }
+        free(words);
+        free(copy_of_sentence);
     }
     *text_len = c;
     return formated_text;
