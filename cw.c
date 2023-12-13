@@ -109,7 +109,6 @@ char** delete_duplicate(char** text, int* text_len)
             if(comp_str((text)[i], (text)[j]) == 1)
             {
                 check_arr[j] = 1;
-                printf("%s %s %d %d %d\n", text[i], text[j], i,j,check_arr[j]);
             }
         }
     }
@@ -120,15 +119,34 @@ char** delete_duplicate(char** text, int* text_len)
         {
             uniqe_text[b] = text[i];
             b++;
-            printf("uniqe\n");
-        }
-        else
-        {
-            printf("not uniqe\n");
         }
     }
     *text_len = b;
     return uniqe_text;
+}
+//Делим предложения на слова
+char** split_sentence(char* sentence, int* word_count)
+{
+    int c = 0;
+    int sentence_len = strlen(sentence);
+    int max_words = MEM_STEP;
+    char** words = malloc(max_words * sizeof(char*));
+    char* copy_of_sentence = strdup(sentence);
+    char* token = strtok(copy_of_sentence, ", .");
+    while (token != NULL)
+    {
+        if(c == max_words)
+        {
+            max_words += MEM_STEP;
+            words = realloc(words, max_words * sizeof(char*));
+        }
+        words[c] = strdup(token);
+        token = strtok(NULL, ", ");
+        c++;
+    }
+    free(copy_of_sentence);
+    *word_count = c;
+    return words;
 }
 
 //Исполнение 1 задачи
@@ -158,24 +176,8 @@ char** delete_even(char** new_text, int* text_len)
     int c = 0;
     for(int i = 0; i < *text_len; i++)
     {
-        char* copy_of_sentence = strdup(new_text[i]);
         int word_count = 0;
-        int max_words = 10;
-        char** words = malloc(max_words * sizeof(char*));
-        char* token = strtok(copy_of_sentence, ", ");
-        while (token != NULL)
-        {
-            if(word_count == max_words)
-            {
-                max_words += 10;
-                words = realloc(words, max_words * sizeof(char*));
-            }
-            words[word_count] = malloc((strlen(token) + 1) * sizeof(char));
-            words[word_count] = strdup(token);
-            token = strtok(NULL, ", ");
-            word_count++;
-        }
-
+        char** splited_sentence = split_sentence(new_text[i], &word_count);
         if(word_count % 2 != 0)
         {
             formated_text[c] = strdup(new_text[i]);
@@ -184,15 +186,66 @@ char** delete_even(char** new_text, int* text_len)
 
         for (int j = 0; j < word_count; j++)
         {
-            free(words[j]);
+            free(splited_sentence[j]);
         }
-        free(words);
-        free(copy_of_sentence);
+        free(splited_sentence);
     }
     *text_len = c;
     return formated_text;
 }
 
+//Исполнение 4 функции
+int all_upper(char* word, int word_len)
+{
+    int c = 0;
+    for(int i = 0; i < word_len; i++)
+    {
+        if(isupper(word[i]))
+        {
+            c++;
+            if(c == word_len)
+            {
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
+
+void print_blue(char** new_text, int* text_len)
+{
+    for(int i = 0; i < *text_len; i++)
+    {
+        int c = 0;
+        int word_count = 0;
+        char** splited_sentence = split_sentence(new_text[i], &word_count);
+        if(word_count % 2 != 0)
+        {
+            for(int j = 0; j < strlen(new_text[i]); j++)
+            {
+                if (all_upper(splited_sentence[word_count / 2], strlen(splited_sentence[word_count / 2])))
+                {
+                    if((new_text[i][j] == ' ' || new_text[i][j] == ',') && (new_text[i][j-1] != ' ' && new_text[i][j-1] != ','))
+                    {
+                    c++;
+                    }
+                    if((c == word_count / 2 || word_count == 1) && isalnum(new_text[i][j]) && all_upper(splited_sentence[word_count / 2], strlen(splited_sentence[word_count / 2])))
+                    {
+                        printf("\x1b[34m%c\x1b[0m", new_text[i][j]);
+                    }
+                    else if(new_text[i][j] == '.')
+                    {
+                        printf(". ");
+                    }
+                    else
+                    {
+                        printf("%c", new_text[i][j]);
+                    }
+                }
+            }
+        }
+    }
+}
 //Вывод
 void print_text(char** text, int text_len)
 {
@@ -227,7 +280,7 @@ int main(void)
 
         break;
     case 4:
-
+        print_blue(new_text, &text_len);
         break;
     default:
         break;
