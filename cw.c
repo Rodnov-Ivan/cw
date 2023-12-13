@@ -193,6 +193,47 @@ char** delete_even(char** new_text, int* text_len)
     *text_len = c;
     return formated_text;
 }
+//Исполнение 3 функции
+int isVowel(char c) {
+    c = tolower(c);
+    return (strchr("aeiou", c) != NULL);
+}
+
+int summ_of_vowels(char* sentence1, int sentence_len1)
+{
+    int c = 0;
+    int word_count = 0;
+    char** splited_sentence = split_sentence(sentence1, &word_count);
+    for(int i = 0; i < sentence_len1; i++)
+    {
+        if(i % 2 == 0)
+        {
+            if(isVowel(sentence1[i]))
+            {
+                c++;               
+            }
+        }
+    }
+    return c;
+}
+
+int cmp(const void* a, const void* b)
+{
+    char* first = *(char**)a;
+    char* second = *(char**)b;
+    int summ_f = summ_of_vowels(first, strlen(first));
+    int summ_s = summ_of_vowels(second, strlen(second));
+    return summ_s - summ_f;
+}
+
+void sort_by_vowels(char** new_text, int* text_len)
+{
+    qsort(new_text, *text_len, sizeof(char*), cmp);
+    for(int i = 0; i < *text_len; i++)
+    {
+        printf("%s\n", new_text[i]);
+    }
+}
 
 //Исполнение 4 функции
 int all_upper(char* word, int word_len)
@@ -277,7 +318,7 @@ int main(void)
         print_text(s_func, text_len);
         break;
     case 3:
-
+        sort_by_vowels(new_text, &text_len);
         break;
     case 4:
         print_blue(new_text, &text_len);
