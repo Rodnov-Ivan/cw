@@ -6,12 +6,12 @@
 #define END_OF_STRING '\n'
 
 
-void print_CW_info()
+void print_student_info()
 {
     printf("Course work for option 4.1, created by Ivan Rodnov\n");
 }
 //Посимвольный ввод текста
-char* get_sentence()
+char* get_sentence(int* nl_count)
 {
     int size = MEM_STEP;
     char* sentence = malloc(size*sizeof(char));
@@ -21,7 +21,20 @@ char* get_sentence()
     {
         temp_char = getchar();
         // ?
-        if(sentence_len == 0 && temp_char == ' ')
+        if(temp_char == END_OF_STRING)
+        {
+            (*nl_count)++;
+            if (*nl_count == 2)
+            {
+                break;
+            }
+        }
+        else
+        {
+            *nl_count = 0;
+        }
+
+        if(sentence_len == 0 && (temp_char == ' ' || temp_char == '.'))
         {
             continue;
         }
@@ -35,33 +48,40 @@ char* get_sentence()
                 sentence = realloc(sentence, sizeof(char) * size);
             }
         }
-    } while (temp_char != '.' && temp_char != END_OF_STRING);
+    } while (temp_char != '.');
+    /* for(int i = 0; i < sentence_len; i++){
+        printf("%ls")
+    } */
     sentence[sentence_len] = '\0';
+    
     return sentence;
 }
 
 char** make_text(int* text_len){
     int size = MEM_STEP;
-    char** text = malloc(size * sizeof(char*));
+    char** text = malloc((size + 1) * sizeof(char*));
     int local_text_len = 0;
     int nl_count = 0;
     char* temp_sentence;
-    do
-    {
-        temp_sentence = get_sentence();
-        int len = strlen(temp_sentence);
-        if (len > 0 && temp_sentence[len - 1] == END_OF_STRING)
+    while(1)
+    {   
+        temp_sentence = get_sentence(&nl_count);
+        int len_sentence = strlen(temp_sentence);
+        if (nl_count == 2)
         {
-            nl_count++;
+            break;
         }
         else
         {
             nl_count = 0;
-            text[local_text_len] = temp_sentence;
-            local_text_len++;
-        }
-        
-    } while(nl_count < 2);
+            if (!(temp_sentence[0] == '.'))
+            {
+                text[local_text_len] = temp_sentence;
+                local_text_len++;
+            }
+            
+        }  
+    }
     *text_len = local_text_len;
     return text;
 }
@@ -122,6 +142,7 @@ char** delete_duplicate(char** text, int* text_len)
         }
     }
     *text_len = b;
+    free(check_arr);
     return uniqe_text;
 }
 //Делим предложения на слова
@@ -132,7 +153,7 @@ char** split_sentence(char* sentence, int* word_count)
     int max_words = MEM_STEP;
     char** words = malloc(max_words * sizeof(char*));
     char* copy_of_sentence = strdup(sentence);
-    char* token = strtok(copy_of_sentence, ", .");
+    char* token = strtok(copy_of_sentence, " .,");
     while (token != NULL)
     {
         if(c == max_words)
@@ -141,7 +162,7 @@ char** split_sentence(char* sentence, int* word_count)
             words = realloc(words, max_words * sizeof(char*));
         }
         words[c] = strdup(token);
-        token = strtok(NULL, ", ");
+        token = strtok(NULL, " .,");
         c++;
     }
     free(copy_of_sentence);
@@ -150,7 +171,7 @@ char** split_sentence(char* sentence, int* word_count)
 }
 
 //Исполнение 1 задачи
-char** f_upper(char** new_text, int* text_len)
+void f_upper(char** new_text, int* text_len)
 {
     for(int i = 0; i < *text_len; i++)
     {
@@ -167,10 +188,13 @@ char** f_upper(char** new_text, int* text_len)
             }
         }
     }
-    return new_text;
+    for(int i = 0; i < *text_len; i++)
+    {
+        printf("%s\n", new_text[i]);
+    }
 }
 //Исполнение 2 функции
-char** delete_even(char** new_text, int* text_len)
+void remove_even_word_sentences(char** new_text, int* text_len)
 {
     char** formated_text = malloc(*text_len * sizeof(char*));
     int c = 0;
@@ -191,7 +215,14 @@ char** delete_even(char** new_text, int* text_len)
         free(splited_sentence);
     }
     *text_len = c;
-    return formated_text;
+    for(int i = 0; i < *text_len; i++)
+    {
+        printf("%s\n", formated_text[i]);
+    }
+    for(int i = 0; i < *text_len; i++)
+    {
+        free(formated_text[i]);
+    }
 }
 //Исполнение 3 функции
 int isVowel(char c) {
@@ -276,7 +307,7 @@ void print_blue(char** new_text, int* text_len)
                     }
                     else if(new_text[i][j] == '.')
                     {
-                        printf(". ");
+                        printf(".\n");
                     }
                     else
                     {
@@ -287,6 +318,23 @@ void print_blue(char** new_text, int* text_len)
         }
     }
 }
+//Вывод справки
+void print_CW_info()
+{
+    printf("This program can change text like this:\n");
+    printf("0) Print text in which all duplicate sentences have been removed.\n");
+    printf("1) Transform sentences so that each first word begins with a capital letter and all others are lowercase.\n");
+    printf("2) Remove all sentences containing an even number of words.\n");
+    printf("3) Sort the sentences by the sum of the number of vowels in every second word.\n");
+    printf("4) Print all sentences in the middle of which there are words consisting of capital letters. These words are highlighted in blue.\n");
+}
+
+//Очистка памяти
+void free_text(char** text, int text_len)
+{
+    free(text);
+}
+
 //Вывод
 void print_text(char** text, int text_len)
 {
@@ -298,10 +346,10 @@ void print_text(char** text, int text_len)
 
 int main(void)
 {
-    print_CW_info();
+    print_student_info();
     int text_len = 0;
     int func_num;
-    scanf("%d", &func_num);
+    scanf("%d\n", &func_num);
     char** text = make_text(&text_len);
     char** new_text = delete_duplicate(text, &text_len);
     switch (func_num)
@@ -310,12 +358,10 @@ int main(void)
         print_text(new_text, text_len);
         break;
     case 1:
-        char** f_func = f_upper(new_text, &text_len);
-        print_text(f_func, text_len);
+        f_upper(new_text, &text_len);
         break;
     case 2:
-        char** s_func = delete_even(new_text, &text_len);
-        print_text(s_func, text_len);
+        remove_even_word_sentences(new_text, &text_len);
         break;
     case 3:
         sort_by_vowels(new_text, &text_len);
@@ -323,8 +369,14 @@ int main(void)
     case 4:
         print_blue(new_text, &text_len);
         break;
+    case 5:
+        print_CW_info();
+        break;
     default:
+        printf("Error. Wrong function number!");
         break;
     }
+    free_text(text, text_len);
+    free_text(new_text, text_len);
     return 0;
 }
