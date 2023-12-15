@@ -39,8 +39,10 @@ char* get_sentence(int* nl_count)
             continue;
         }
         else
-        {
+        {   
             sentence[sentence_len] = temp_char;
+            if(sentence[sentence_len] == '\n')
+                printf("%c", sentence[sentence_len]);
             sentence_len++;
             if(sentence_len == size - 1)
             {
@@ -49,9 +51,6 @@ char* get_sentence(int* nl_count)
             }
         }
     } while (temp_char != '.');
-    /* for(int i = 0; i < sentence_len; i++){
-        printf("%ls")
-    } */
     sentence[sentence_len] = '\0';
     
     return sentence;
@@ -74,12 +73,14 @@ char** make_text(int* text_len){
         else
         {
             nl_count = 0;
-            if (!(temp_sentence[0] == '.'))
+
+            text[local_text_len] = temp_sentence;
+            local_text_len++;
+            if(local_text_len == size - 1)
             {
-                text[local_text_len] = temp_sentence;
-                local_text_len++;
+                size += MEM_STEP;
+                text = realloc(text, sizeof(char*) * size);
             }
-            
         }  
     }
     *text_len = local_text_len;
